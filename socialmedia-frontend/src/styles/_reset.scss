@@ -1,0 +1,14 @@
+@use 'variables' as vars;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: vars.$text-primary;
+    background-color: vars.$background-light;
+    overflow: hidden;
+}

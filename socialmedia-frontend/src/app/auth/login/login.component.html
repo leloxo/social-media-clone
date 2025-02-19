@@ -1,0 +1,26 @@
+<div class="login-container">
+    <mat-card>
+        <form class="form flex flex-center" [formGroup]="loginForm">
+            <h2>Login</h2>
+            <mat-form-field class="form-field" appearance="outline">
+                <mat-label>Email</mat-label>
+                <input type="email" matInput formControlName="email">
+                @if (loginForm.get('email')?.hasError('required')) {
+                <mat-error>Email is required</mat-error>
+                }
+                @if (loginForm.get('email')?.hasError('email')) {
+                <mat-error>Invalid email</mat-error>
+                }
+            </mat-form-field>
+            <mat-form-field class="form-field" appearance="outline">
+                <mat-label>Password</mat-label>
+                <input type="password" matInput formControlName="password">
+                @if (loginForm.get('password')?.hasError('required')) {
+                <mat-error>Password is required</mat-error>
+                }
+            </mat-form-field>
+            <button mat-stroked-button (click)="onLogin()" [disabled]="loginForm.invalid">LOGIN</button>
+        </form>
+        <button mat-stroked-button (click)="onLogout()" >LOGOUT</button>
+    </mat-card>
+</div>

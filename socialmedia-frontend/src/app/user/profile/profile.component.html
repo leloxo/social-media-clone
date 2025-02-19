@@ -1,0 +1,69 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <div class="profile-picture-container">
+      <img [src]="user?.profileImageUrl || 'assets/avatar.png'" alt="Profile picture" class="profile-picture">
+    </div>
+
+    <div class="profile-info">
+      <div class="username-actions">
+        <h1 class="username">{{ user?.userName || 'username' }}</h1>
+        <div class="action-buttons">
+          <button mat-button class="edit-profile-btn" *ngIf="isOwnProfile">Edit Profile</button>
+          <button mat-button class="follow-btn" *ngIf="!isOwnProfile">Follow</button>
+          <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Menu">
+            <mat-icon>more_horiz</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item>Block</button>
+            <button mat-menu-item>Report</button>
+            <button mat-menu-item>Share Profile</button>
+          </mat-menu>
+        </div>
+      </div>
+
+      <div class="profile-stats">
+        <!-- <span><strong>{{ user?.postCount || 0 }}</strong> posts</span>
+          <span><strong>{{ user?.followerCount || 0 }}</strong> followers</span>
+          <span><strong>{{ user?.followingCount || 0 }}</strong> following</span> -->
+        <span><strong>{{ 0 }}</strong> posts</span>
+        <span><strong>{{ 0 }}</strong> followers</span>
+        <span><strong>{{ 0 }}</strong> following</span>
+      </div>
+
+      <div class="full-name-bio">
+        <h2 class="full-name">{{ user?.firstName }} {{ user?.lastName }}</h2>
+        <p class="bio">{{ user?.biography || 'No biography provided' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Navigation -->
+  <nav class="content-nav">
+    <a class="active">
+      <mat-icon>grid_on</mat-icon>
+      <span>POSTS</span>
+    </a>
+  </nav>
+
+  <!-- Posts Grid -->
+  <div class="posts-grid" *ngIf="posts?.length; else noPosts">
+    <div class="post-item" *ngFor="let post of posts">
+      <img [src]="post.imageUrl" alt="Post">
+      <div class="post-overlay">
+        <div class="post-stats">
+          <span><mat-icon>favorite</mat-icon> {{ post.likeCount }}</span>
+          <span><mat-icon>comment</mat-icon> {{ post.commentCount }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noPosts>
+    <div class="no-posts">
+      <mat-icon>photo_camera</mat-icon>
+      <h2>No Posts Yet</h2>
+      <p>When you share photos, they will appear on your profile</p>
+      <button mat-raised-button color="primary">Share your first photo</button>
+    </div>
+  </ng-template>
+</div>

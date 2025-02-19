@@ -1,0 +1,265 @@
+@use '../../../styles/index.scss' as *;
+
+.profile-container {
+    @extend .container;
+
+    .profile-header {
+        display: flex;
+        margin-bottom: $spacing-xxl;
+
+        @include mobile {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+
+    .profile-picture {
+        &-container {
+            margin-right: $spacing-xxl;
+            flex-shrink: 0;
+
+            @include mobile {
+                margin-right: 0;
+                margin-bottom: $spacing-lg;
+            }
+        }
+
+        & {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid $text-primary;
+        }
+
+        @include mobile {
+            width: 100px;
+            height: 100px;
+        }
+    }
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.username-actions {
+    display: flex;
+    align-items: center;
+    margin-bottom: $spacing-lg;
+
+    @include mobile {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .username {
+        font-size: 28px;
+        font-weight: 300;
+        margin-right: $spacing-lg;
+        margin-bottom: 0;
+
+        @include mobile {
+            margin-right: 0;
+            margin-bottom: $spacing-sm;
+        }
+    }
+}
+
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+
+    .edit-profile-btn,
+    .follow-btn {
+        border: 1px solid $border-color;
+        border-radius: 4px;
+        font-weight: 600;
+        padding: 0 $spacing-xl;
+    }
+
+    .follow-btn {
+        background-color: $primary-color;
+        color: white;
+    }
+}
+
+.profile-stats {
+    display: flex;
+    margin-bottom: $spacing-lg;
+
+    span {
+        margin-right: $spacing-xxl;
+        font-size: 16px;
+
+        strong {
+            font-weight: 600;
+        }
+
+        @include mobile {
+            margin-right: $spacing-lg;
+        }
+    }
+
+    @include mobile {
+        justify-content: center;
+    }
+}
+
+.full-name-bio {
+    .full-name {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: $spacing-xs;
+    }
+
+    .bio {
+        margin: 0 0 $spacing-xs;
+        font-size: 16px;
+        line-height: 24px;
+    }
+
+    .website {
+        color: $secondary-color;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    @include mobile {
+        text-align: center;
+    }
+}
+
+.content-nav {
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid $border-color;
+    margin-bottom: $spacing-lg;
+
+    a {
+        display: flex;
+        align-items: center;
+        padding: $spacing-lg 0;
+        margin-right: $spacing-xxl * 2;
+        cursor: pointer;
+        color: $text-secondary;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 1px;
+
+        &:last-child {
+            margin-right: 0;
+        }
+
+        &.active {
+            color: $primary-color;
+            border-top: 1px solid $primary-color;
+            margin-top: -1px;
+        }
+
+        .mat-icon {
+            margin-right: $spacing-xs;
+            font-size: 18px;
+        }
+
+        @include mobile {
+            margin-right: $spacing-xl;
+            flex-direction: column;
+
+            .mat-icon {
+                margin-right: 0;
+                margin-bottom: $spacing-xs;
+            }
+        }
+    }
+}
+
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $spacing-xl;
+
+    @include mobile {
+        gap: $spacing-xs;
+    }
+}
+
+.post-item {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%; // Creates a square
+    overflow: hidden;
+
+    img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .post-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: $overlay-background;
+        @include flex-center;
+        opacity: 0;
+        transition: opacity 0.3s;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+
+    .post-stats {
+        display: flex;
+        color: $background-light;
+
+        span {
+            @include flex-center;
+            margin: 0 $spacing-sm;
+            font-weight: 600;
+
+            .mat-icon {
+                margin-right: $spacing-xs;
+            }
+        }
+    }
+}
+
+.no-posts {
+    @include flex-center;
+    flex-direction: column;
+    padding: $spacing-xxl * 2;
+    text-align: center;
+
+    .mat-icon {
+        font-size: 50px;
+        height: 50px;
+        width: 50px;
+        color: $text-secondary;
+        margin-bottom: $spacing-lg;
+    }
+
+    h2 {
+        font-size: 30px;
+        font-weight: 300;
+        margin-bottom: $spacing-md;
+    }
+
+    p {
+        color: $text-secondary;
+        margin-bottom: $spacing-lg;
+    }
+
+    button {
+        padding: $spacing-sm;
+    }
+}

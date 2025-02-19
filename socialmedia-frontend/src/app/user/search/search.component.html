@@ -1,0 +1,11 @@
+<div class="search-container">
+    <input type="text" placeholder="Search users..." [(ngModel)]="searchTerm" (input)="onSearch()" />
+    
+    <div *ngIf="users && users.length > 0">
+        <ul>
+            <li *ngFor="let user of users" (click)="viewUserProfile(user.userName)">
+                {{ user.userName }}
+            </li>
+        </ul>
+    </div>
+</div>
