@@ -1,29 +1,32 @@
-import { Component } from '@angular/core';
-import { AuthService } from '../auth.service';
-import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormControl, FormGroup, FormsModule, Validators } from '@angular/forms';
-
-import { ReactiveFormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { Component } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { MessageService } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { MessageModule } from 'primeng/message';
+import { PasswordModule } from 'primeng/password';
+import { ToastModule } from 'primeng/toast';
+import { AppDarkModeToggle } from "../../layout/component/app.dark-mode-toggle";
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     ReactiveFormsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatInputModule,
-    MatFormFieldModule
+    ButtonModule,
+    InputTextModule,
+    ToastModule,
+    MessageModule,
+    PasswordModule,
+    RouterModule,
+    AppDarkModeToggle
   ],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  providers: [MessageService]
 })
 export class LoginComponent {
   loginForm = new FormGroup({
@@ -31,7 +34,7 @@ export class LoginComponent {
     password: new FormControl('', [Validators.required]),
   });
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private messageService: MessageService, private router: Router) {}
 
   onLogin(): void {
     if (this.loginForm.invalid) {
@@ -48,7 +51,7 @@ export class LoginComponent {
         this.router.navigate([`/profile/me`]);
       },
       error: (err: any) => {
-        alert('Invalid credentials');
+        this.showErrorViaToast();
       }
     });
   }
@@ -57,5 +60,9 @@ export class LoginComponent {
   onLogout(): void {
     this.authService.logout();
     console.log('Logged out!');
+  }
+
+  showErrorViaToast() {
+    this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Invalid credentials' });
   }
 }

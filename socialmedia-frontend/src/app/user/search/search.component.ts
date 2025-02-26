@@ -1,16 +1,25 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { IconField } from 'primeng/iconfield';
+import { InputIcon } from 'primeng/inputicon';
+import { InputTextModule } from 'primeng/inputtext';
+import { Subject, debounceTime } from 'rxjs';
 import { User } from '../../models/user.model';
 import { UserService } from '../user.service';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { Subject, debounceTime } from 'rxjs';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-search',
-  imports: [FormsModule, CommonModule],
+  imports: [
+    FormsModule, 
+    CommonModule,
+    ReactiveFormsModule,
+    InputIcon, 
+    IconField, 
+    InputTextModule,
+  ],
   templateUrl: './search.component.html',
-  styleUrl: './search.component.scss'
 })
 export class SearchComponent {
   searchTerm: string = '';

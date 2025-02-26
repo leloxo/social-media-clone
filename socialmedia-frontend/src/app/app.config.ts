@@ -1,18 +1,27 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideAnimations } from '@angular/platform-browser/animations';
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
 import { jwtInterceptor } from './auth/jwt.interceptor';
-
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { providePrimeNG } from 'primeng/config';
 import { routes } from './app.routes';
+import { Noir } from '../assets/layout/noir-preset';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes),
-    provideAnimations(),
-    provideHttpClient(
-      withInterceptors([jwtInterceptor])
+    provideRouter(
+      routes, 
+      withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }), 
+      withEnabledBlockingInitialNavigation()
     ),
-    provideZoneChangeDetection({ eventCoalescing: true }), 
+    provideHttpClient(withInterceptors([jwtInterceptor])),
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideAnimationsAsync(),
+    providePrimeNG({
+      theme: {
+        preset: Noir,
+        options: { darkModeSelector: '.app-dark' }
+      }
+    })
   ]
 };

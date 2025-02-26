@@ -1,41 +1,26 @@
 @use '../../../styles/index.scss' as *;
+@use '../../../assets/layout/layout.scss' as *;
 
 .profile-container {
-    @extend .container;
+    @extend .card;
+}
 
-    .profile-header {
-        display: flex;
-        margin-bottom: $spacing-xxl;
+.profile-header {
+    display: flex;
+    margin-bottom: $spacing-xxl;
+}
 
-        @include mobile {
-            flex-direction: column;
-            align-items: center;
-        }
+.profile-picture {
+    &-container {
+        margin-right: $spacing-xxl;
+        flex-shrink: 0;
     }
 
-    .profile-picture {
-        &-container {
-            margin-right: $spacing-xxl;
-            flex-shrink: 0;
-
-            @include mobile {
-                margin-right: 0;
-                margin-bottom: $spacing-lg;
-            }
-        }
-
-        & {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1px solid $text-primary;
-        }
-
-        @include mobile {
-            width: 100px;
-            height: 100px;
-        }
+    & {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
     }
 }
 
@@ -48,21 +33,11 @@
     align-items: center;
     margin-bottom: $spacing-lg;
 
-    @include mobile {
-        flex-direction: column;
-        align-items: center;
-    }
-
     .username {
         font-size: 28px;
-        font-weight: 300;
+        font-weight: 400;
         margin-right: $spacing-lg;
         margin-bottom: 0;
-
-        @include mobile {
-            margin-right: 0;
-            margin-bottom: $spacing-sm;
-        }
     }
 }
 
@@ -70,19 +45,6 @@
     display: flex;
     align-items: center;
     gap: $spacing-sm;
-
-    .edit-profile-btn,
-    .follow-btn {
-        border: 1px solid $border-color;
-        border-radius: 4px;
-        font-weight: 600;
-        padding: 0 $spacing-xl;
-    }
-
-    .follow-btn {
-        background-color: $primary-color;
-        color: white;
-    }
 }
 
 .profile-stats {
@@ -95,15 +57,8 @@
 
         strong {
             font-weight: 600;
+            margin-right: $spacing-xs;
         }
-
-        @include mobile {
-            margin-right: $spacing-lg;
-        }
-    }
-
-    @include mobile {
-        justify-content: center;
     }
 }
 
@@ -119,62 +74,13 @@
         font-size: 16px;
         line-height: 24px;
     }
-
-    .website {
-        color: $secondary-color;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 16px;
-    }
-
-    @include mobile {
-        text-align: center;
-    }
 }
 
-.content-nav {
+.content-border {
     display: flex;
     justify-content: center;
     border-top: 1px solid $border-color;
     margin-bottom: $spacing-lg;
-
-    a {
-        display: flex;
-        align-items: center;
-        padding: $spacing-lg 0;
-        margin-right: $spacing-xxl * 2;
-        cursor: pointer;
-        color: $text-secondary;
-        text-decoration: none;
-        font-size: 12px;
-        font-weight: 600;
-        letter-spacing: 1px;
-
-        &:last-child {
-            margin-right: 0;
-        }
-
-        &.active {
-            color: $primary-color;
-            border-top: 1px solid $primary-color;
-            margin-top: -1px;
-        }
-
-        .mat-icon {
-            margin-right: $spacing-xs;
-            font-size: 18px;
-        }
-
-        @include mobile {
-            margin-right: $spacing-xl;
-            flex-direction: column;
-
-            .mat-icon {
-                margin-right: 0;
-                margin-bottom: $spacing-xs;
-            }
-        }
-    }
 }
 
 .posts-grid {
@@ -240,26 +146,16 @@
     padding: $spacing-xxl * 2;
     text-align: center;
 
-    .mat-icon {
-        font-size: 50px;
-        height: 50px;
-        width: 50px;
-        color: $text-secondary;
-        margin-bottom: $spacing-lg;
-    }
-
     h2 {
         font-size: 30px;
-        font-weight: 300;
+        font-weight: 400;
         margin-bottom: $spacing-md;
+        color: var(--text-color);
     }
 
     p {
         color: $text-secondary;
         margin-bottom: $spacing-lg;
-    }
-
-    button {
-        padding: $spacing-sm;
+        color: var(--text-color-secondary);
     }
 }

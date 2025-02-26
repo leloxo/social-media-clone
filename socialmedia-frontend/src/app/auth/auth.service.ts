@@ -13,7 +13,7 @@ export class AuthService {
     // TODO use DTO classes and make user class
     
     register(personData: any): Observable<any> {
-        return this.http.post(`${this.baseUrl}/register`, personData);
+        return this.http.post(`${this.baseUrl}/signup`, personData);
     }
 
     login(credentials: any): Observable<any> {
