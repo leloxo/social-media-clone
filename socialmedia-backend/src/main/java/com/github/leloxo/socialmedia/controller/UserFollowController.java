@@ -25,21 +25,21 @@ public class UserFollowController {
     }
 
     @PostMapping("/{targetUserId}")
-    public ResponseEntity<String> followUser(
+    public ResponseEntity<Void> followUser(
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long targetUserId
     ) throws ResourceNotFoundException {
         userFollowService.followUser(currentUser.getId(), targetUserId);
-        return ResponseEntity.ok("Successfully followed user");
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{targetUserId}")
-    public ResponseEntity<String> unfollowUser(
+    public ResponseEntity<Void> unfollowUser(
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long targetUserId
     ) {
         userFollowService.unfollowUser(currentUser.getId(), targetUserId);
-        return ResponseEntity.ok("Successfully unfollowed user");
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/followers")
@@ -54,25 +54,34 @@ public class UserFollowController {
         return ResponseEntity.ok(dataConvertor.toUserSummaryDtoList(followers));
     }
 
-    @GetMapping("/followers/count")
-    public ResponseEntity<Long> getFollowersCount(@AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(userFollowService.getFollowersCount(currentUser.getId()));
+    @GetMapping("/followers/count/{userId}")
+    public ResponseEntity<Long> getFollowersCount(@PathVariable Long userId) {
+        return ResponseEntity.ok(userFollowService.getFollowersCount(userId));
     }
 
-    @GetMapping("/following/count")
-    public ResponseEntity<Long> getFollowingCount(@AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(userFollowService.getFollowingCount(currentUser.getId()));
+    @GetMapping("/following/count/{userId}")
+    public ResponseEntity<Long> getFollowingCount(@PathVariable Long userId) {
+        return ResponseEntity.ok(userFollowService.getFollowingCount(userId));
     }
+
+//    @GetMapping("/status/{targetUserId}")
+//    public ResponseEntity<Map<String, Boolean>> getFollowStatus(
+//            @AuthenticationPrincipal User currentUser,
+//            @PathVariable Long targetUserId
+//    ) {
+//        boolean isFollowing = userFollowService.isFollowing(currentUser.getId(), targetUserId);
+//        Map<String, Boolean> response = new HashMap<>();
+//        response.put("following", isFollowing);
+//        return ResponseEntity.ok(response);
+//    }
 
     @GetMapping("/status/{targetUserId}")
-    public ResponseEntity<Map<String, Boolean>> getFollowStatus(
+    public ResponseEntity<Boolean> getFollowStatus(
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long targetUserId
     ) {
         boolean isFollowing = userFollowService.isFollowing(currentUser.getId(), targetUserId);
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("following", isFollowing);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(isFollowing);
     }
 
     // TODO: leave in or remove?

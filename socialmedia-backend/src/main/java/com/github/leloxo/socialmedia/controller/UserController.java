@@ -66,6 +66,9 @@ public class UserController {
         if (!currentUser.getId().equals(userId)) {
             throw new UnauthorizedException("You can only update your own profile");
         }
+
+        System.out.println(updatedUserDetails);
+
         User updatedUser = userService.updateUser(userId, updatedUserDetails);
         return ResponseEntity.ok(dataConvertor.toUserDto(updatedUser));
     }

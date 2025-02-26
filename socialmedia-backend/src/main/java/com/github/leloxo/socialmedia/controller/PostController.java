@@ -8,6 +8,8 @@ import com.github.leloxo.socialmedia.model.Post;
 import com.github.leloxo.socialmedia.model.User;
 import com.github.leloxo.socialmedia.service.PostService;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -23,6 +25,8 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/posts")
 public class PostController {
+    private static final Logger logger = LogManager.getLogger(PostController.class);
+
     private final PostService postService;
     private final DataConvertor dataConvertor;
 
@@ -45,6 +49,14 @@ public class PostController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(dataConvertor.toPostDto(newPost));
+    }
+
+    // TODO: change path
+    // TODO: Return type ?
+    @PostMapping("/i")
+    public ResponseEntity<String> uploadImage(@RequestPart("image") MultipartFile image) throws IOException {
+        String imageUrl = postService.uploadImage(image);
+        return ResponseEntity.status(HttpStatus.CREATED).body(imageUrl);
     }
 
     @GetMapping("/{postId}")
