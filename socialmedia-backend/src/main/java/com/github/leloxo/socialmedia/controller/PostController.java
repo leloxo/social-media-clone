@@ -47,8 +47,7 @@ public class PostController {
         String imageUrl = postService.uploadImage(image);
         Post newPost = postService.createPost(caption, imageUrl, currentUser);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(dataConvertor.toPostDto(newPost));
+        return ResponseEntity.status(HttpStatus.CREATED).body(dataConvertor.toPostDto(newPost));
     }
 
     // TODO: change path
@@ -65,20 +64,21 @@ public class PostController {
         return ResponseEntity.ok(dataConvertor.toPostDto(post));
     }
 
-//    @GetMapping
-//    public ResponseEntity<Page<PostDetailsResponse>> getAllPosts(
-//            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-//        Page<Post> posts = postService.getAllPosts(pageable);
-//        Page<PostDetailsResponse> postDtos = posts.map(dataConvertor::toPostDto);
-//        return ResponseEntity.ok(postDtos);
-//    }
+    // TODO: remove?
+    @GetMapping
+    public ResponseEntity<Page<PostDetailsResponse>> getAllPosts(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<Post> posts = postService.getAllPosts(pageable);
+        Page<PostDetailsResponse> postDtos = posts.map(dataConvertor::toPostDto);
+        return ResponseEntity.ok(postDtos);
+    }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/user/{username}")
     public ResponseEntity<Page<PostDetailsResponse>> getPostsByUser(
-            @PathVariable Long userId,
+            @PathVariable String username,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<Post> posts = postService.getPostsByUserId(userId, pageable);
+        Page<Post> posts = postService.getPostsByUserName(username, pageable);
         Page<PostDetailsResponse> postDtos = posts.map(dataConvertor::toPostDto);
         return ResponseEntity.ok(postDtos);
     }

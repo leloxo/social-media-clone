@@ -29,6 +29,15 @@ public interface PostRepository extends JpaRepository<Post, Long> {
         LEFT JOIN FETCH p.author
         LEFT JOIN FETCH p.comments c
         LEFT JOIN FETCH c.author
+        WHERE p.author.userName = :username
+        """)
+    Page<Post> findByAuthorUserName(String username, Pageable pageable);
+
+    @Query("""
+        SELECT p FROM Post p
+        LEFT JOIN FETCH p.author
+        LEFT JOIN FETCH p.comments c
+        LEFT JOIN FETCH c.author
         WHERE p.author.id IN :authorIds
         """)
     Page<Post> findByAuthorIdIn(Collection<Long> authorIds, Pageable pageable);

@@ -65,12 +65,16 @@ public class PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Post with id " + postId + " not found"));
     }
 
-//    public Page<Post> getAllPosts(Pageable pageable) {
-//        return postRepository.findAll(pageable);
-//    }
+    public Page<Post> getAllPosts(Pageable pageable) {
+        return postRepository.findAll(pageable);
+    }
 
     public Page<Post> getPostsByUserId(Long userId, Pageable pageable) {
         return postRepository.findByAuthorId(userId, pageable);
+    }
+
+    public Page<Post> getPostsByUserName(String username, Pageable pageable) {
+        return postRepository.findByAuthorUserName(username, pageable);
     }
 
     public Page<Post> getFeedForUser(Long userId, Pageable pageable) {
