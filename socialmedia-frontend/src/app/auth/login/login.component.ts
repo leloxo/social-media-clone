@@ -56,12 +56,6 @@ export class LoginComponent {
     });
   }
 
-  // TODO: move to profile
-  onLogout(): void {
-    this.authService.logout();
-    console.log('Logged out!');
-  }
-
   showErrorViaToast() {
     this.messageService.add({ severity: 'error', summary: 'Error Message', detail: 'Invalid credentials' });
   }
