@@ -12,8 +12,7 @@ import { TextareaModule } from 'primeng/textarea';
     TextareaModule,
     Button
   ],
-  templateUrl: './profile-edit.component.html',
-  styleUrl: './profile-edit.component.scss'
+  templateUrl: './profile-edit.component.html'
 })
 export class ProfileEditComponent implements OnInit {
   @Input() user?: User;
@@ -23,6 +22,8 @@ export class ProfileEditComponent implements OnInit {
   editForm: FormGroup;
   previewUrl: string | null = null;
   selectedFile: File | null = null;
+
+  maxBioLength: number = 200;
 
   constructor(private fb: FormBuilder) {
     this.editForm = this.fb.group({
@@ -61,5 +62,9 @@ export class ProfileEditComponent implements OnInit {
 
   onCancel() {
     this.cancelEdit.emit();
+  }
+
+  get bioLength(): number {
+    return this.editForm.get('biography')?.value?.length || 0;
   }
 }
