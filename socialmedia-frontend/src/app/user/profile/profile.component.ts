@@ -1,27 +1,28 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { User } from '../../models/user.model';
 import { UserService } from '../user.service';
 
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 import { Post } from '../../models/post.model';
-import { UserFollowService } from '../user-follow.service';
-import { ProfileEditComponent } from '../profile-edit/profile-edit.component';
 import { UpdateUserDetailsRequest } from '../../models/update-user-details-request.model';
 import { PostService } from '../../post/post.service';
+import { ProfileEditComponent } from '../profile-edit/profile-edit.component';
+import { UserFollowService } from '../user-follow.service';
 
-import { AvatarModule } from 'primeng/avatar';
-import { Menu } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
+import { AvatarModule } from 'primeng/avatar';
 import { Button } from 'primeng/button';
 import { CardModule } from 'primeng/card';
+import { Menu } from 'primeng/menu';
+import { Subject, takeUntil } from 'rxjs';
+
+interface ProfileChanges {
+  biography: string,
+  profileImage?: File
+}
 
 @Component({
   selector: 'app-profile',
@@ -29,37 +30,31 @@ import { CardModule } from 'primeng/card';
   imports: [
     CommonModule,
     FormsModule,
-
-    MatButtonModule,
-    MatIconModule,
-    MatMenuModule,
-    MatCardModule,
-    MatDialogModule,
-
     AvatarModule,
     Menu,
     Button,
     CardModule,
-
     ProfileEditComponent
   ],
   templateUrl: './profile.component.html',
-  styleUrl: './profile.component.scss'
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
+  private userService = inject(UserService);
+  private userFollowService = inject(UserFollowService);
+  private postService = inject(PostService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private authService = inject(AuthService);
+
   user?: User;
   loading = true;
   error?: string;
   isOwnProfile = true;
   username?: string;
-
   posts: Post[] = [];
 
-  menuItems: MenuItem[] = [
-    { label: 'Block', icon: 'pi pi-ban' },
-    { label: 'Report', icon: 'pi pi-flag' },
-    { label: 'Share Profile', icon: 'pi pi-share-alt' }
-  ];
+  menuItemsOwnProfile: MenuItem[] | undefined;
+  menuItemsUser: MenuItem[] | undefined;
 
   postCount: number = 0;
   followerCount: number = 0;
@@ -68,195 +63,265 @@ export class ProfileComponent implements OnInit {
   isFollowing: boolean = false;
   isEditMode: boolean= false;
 
-  constructor(
-    private userService: UserService,
-    private userFollowService: UserFollowService,
-    private postService: PostService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private authService: AuthService
-  ) { }
+  private destroy$ = new Subject<void>();
 
   ngOnInit(): void {
-    this.route.params.subscribe(param => {
-      this.username = param['username'];
-
-      const loggedInUsername = this.authService.getUsername();
-      this.isOwnProfile = this.username === 'me' || this.username === loggedInUsername;
-      
-      this.loadProfile();
-    });
+    this.initializeMenuItems();
+    this.subscribeToRouteParamsAndLoadProfile();
   }
 
-  private loadProfile(): void {
-    if (this.isOwnProfile) {
-      this.userService.fetchProfile().subscribe({
-        next: (user) => {
-          this.user = user;
-          
-          this.loadProfileStats();
-          
-          this.loading = false;
-          console.log('User:', user);
-        },
-        error: (err) => {
-          this.error = 'Failed to load profile';
-          this.loading = false;
-          console.error('Error loading profile:', err);
-        }
-      });
-    } else if (this.username) {
-      this.userService.getUserByUsername(this.username).subscribe({
-        next: (user) => {
-          this.user = user;
-
-          this.loadProfileStats();
-          this.getFollowStatus();
-
-          this.loading = false;
-          console.log('User:', user);
-        },
-        error: (err) => {
-          this.error = 'User not found';
-          this.loading = false;
-          console.error('Error loading user:', err);
-        }
-      });
-    }
-  }
-
-  private loadProfileStats(): void {
-    // TODO
-    this.postCount = this.posts.length;
-
-    if (this.user) {
-      console.log("loading profile stats");
-
-      this.userFollowService.getUserFollowersCount(this.user.id).subscribe({
-        next: (followerCount) => {
-          this.followerCount = followerCount;
-        },
-        error: (err) => {
-          this.error = 'Failed to load follower count';
-          console.error('Error loading profile:', err);
-        }
-      });
-  
-      this.userFollowService.getUserFollowingCount(this.user.id).subscribe({
-        next: (followingCount) => {
-          this.followingCount = followingCount;
-        },
-        error: (err) => {
-          this.error = 'Failed to load following count';
-          console.error('Error loading profile:', err);
-        }
-      });
-    }
-  }
-
-  private getFollowStatus(): void {
-    if (this.user && !this.isOwnProfile) {
-      console.log('Loading follow status');
-      this.userFollowService.getFollowStatus(this.user.id).subscribe({
-        next: (isFollowing) => {
-          this.isFollowing = isFollowing;
-          console.log('isFollowing:', true);
-        },
-        error: (err) => {
-          this.error = 'Failed to load follow status';
-          console.error('Error loading profile:', err);
-        }
-      });
-    }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   onFollow(): void {
-    if (this.user && this.username != 'me') {
-      this.userFollowService.followUser(this.user.id).subscribe({
+    if (!this.user || this.username === 'me') return;
+    
+    this.userFollowService.followUser(this.user.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
         next: () => {
-          console.log('Successfully unfollowed user');
-          window.location.reload();
+          console.log('Successfully followed user');
+          this.refreshPage();
         },
         error: (err) => {
-          this.error = 'Failed to follow user';
-          console.error('Error following user:', err);
+          this.handleError('Failed to follow user', err);
         }
       });
-    }
   }
 
   onUnfollow(): void {
-    if (this.user && this.username != 'me') {
-      this.userFollowService.unfollowUser(this.user.id).subscribe({
+    if (!this.user || this.username === 'me') return;
+
+    this.userFollowService.unfollowUser(this.user.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
         next: () => {
           console.log('Successfully unfollowed user');
-          window.location.reload();
+          this.refreshPage();
         },
         error: (err) => {
-          this.error = 'Failed to unfollow user';
-          console.error('Error unfollowing user:', err);
+          this.handleError('Failed to unfollow user', err);
         }
       });
-    }
   }
 
-  // TODO: use type for params
-  onSaveChanges(changes: {biography: string, profileImage?: File}) {
+  onSaveChanges(changes: ProfileChanges) {
+    if (!this.user) return;
+
     if (changes.profileImage) {
-      console.log("Selected File:", changes.profileImage);
-
-      this.postService.uploadProfileImage(changes.profileImage).subscribe({
-        next: (imageUrl) => {
-          console.log('Successfully uploaded profile image:', imageUrl);
-          const profileImageUrl = imageUrl.toString();
-
-          const updatedUserDetails: UpdateUserDetailsRequest = {
-            profileImageUrl,
-            biography: changes.biography,
-          }
-
-          if (this.user) {
-            this.userService.updateUser(this.user.id, updatedUserDetails).subscribe({
-              next: (updatedUser) => {
-                this.user = updatedUser;
-                this.isEditMode = false;
-                console.log('Successfully updated user');
-              },
-              error: (err) => {
-                this.error = 'Failed to update user';
-                console.error('Error updating user:', err);
-              }
-            });
-          }
-        },
-        error: (err) => {
-          this.error = 'Failed to upload image';
-          console.error('Error uploading image:', err);
-        }
-      });
+      this.updateProfileWithImage(changes);
     } else {
-      const updatedUserDetails: UpdateUserDetailsRequest = {
-        profileImageUrl: undefined,
-        biography: changes.biography,
-      }
-  
-      if (this.user) {
-        this.userService.updateUser(this.user.id, updatedUserDetails).subscribe({
-          next: (updatedUser) => {
-            this.user = updatedUser;
-            this.isEditMode = false;
-            console.log('Successfully updated user');
-          },
-          error: (err) => {
-            this.error = 'Failed to update user';
-            console.error('Error updating user:', err);
-          }
-        });
-      }
+      this.updateProfileWithoutImage(changes);
     }
   }
 
   goToUploadPage(): void {
     this.router.navigate(["/upload"]);
+  }
+
+  private initializeMenuItems(): void {
+    //TODO
+
+    this.menuItemsOwnProfile = [
+      { label: 'Options',
+        items: [
+          { label: 'Logout', icon: 'pi pi-sign-out', command: () => this.onLogout() },
+        ]
+      }
+    ];
+    
+    this.menuItemsUser = [
+      { label: 'Options',
+        items: [
+          { label: 'Report User', icon: 'pi pi-flag' },
+        ]
+      }
+    ];
+  }
+
+  private subscribeToRouteParamsAndLoadProfile(): void {
+    this.route.params
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(param => {
+        this.username = param['username'];
+        const loggedInUsername = this.authService.getUsername();
+        this.isOwnProfile = this.username === 'me' || this.username === loggedInUsername;
+
+        this.loadProfile();
+      });
+  }
+
+  private loadProfile(): void {
+    this.loading = true;
+
+    if (this.isOwnProfile) {
+      this.loadOwnProfile();
+    } else if (this.username) {
+      this.loadUserProfile();
+    }
+  }
+
+  private loadOwnProfile(): void {
+    this.userService.fetchProfile()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (user) => {
+          this.user = user;
+          this.initializeProfileData();
+        },
+        error: (err) => {
+          this.handleError('Failed to load profile', err);
+        }
+      });
+  }
+
+  private loadUserProfile(): void {
+    if (!this.username) return;
+
+    this.userService.getUserByUsername(this.username)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (user) => {
+          this.user = user;
+          this.initializeProfileData();
+          this.getFollowStatus();
+        },
+        error: (err) => {
+          this.handleError('User not found', err);
+        }
+      });
+  }
+
+  private initializeProfileData(): void {
+    this.loadProfileStats();
+    this.loadUserPosts();
+    this.loading = false;
+  }
+
+  private loadProfileStats(): void {
+    if (!this.user) return;
+
+    // TODO: Use service, else the post count is wrong
+    this.postCount = this.posts.length;
+
+    this.userFollowService.getUserFollowersCount(this.user.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (count) => {
+          this.followerCount = count;
+        },
+        error: (err) => {
+          this.handleError('Failed to load follower count', err);
+        }
+      });
+
+    this.userFollowService.getUserFollowingCount(this.user.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (count) => {
+          this.followingCount = count;
+        },
+        error: (err) => {
+          this.handleError('Failed to load following count', err);
+        }
+      });
+  }
+
+  private loadUserPosts(): void {
+    const username = this.resolveUsername();
+    if (!username) return;
+
+    this.postService.getPostsByUser(username)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (page) => {
+          this.posts = page.content;
+        },
+        error: (err) => {
+          this.handleError('Failed to fetch posts', err);
+        }
+      });
+  }
+
+  private resolveUsername(): string | null {
+    if (this.username === 'me') {
+      return this.authService.getUsername();
+    }
+    return this.username || null;
+  }
+
+  private getFollowStatus(): void {
+    if (!this.user || this.isOwnProfile) return;
+
+    this.userFollowService.getFollowStatus(this.user.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (isFollowing) => {
+          this.isFollowing = isFollowing;
+        },
+        error: (err) => {
+          this.handleError('Failed to load follow status', err);
+        }
+      });
+  }
+
+  private updateProfileWithImage(changes: ProfileChanges): void {
+    if (!this.user || !changes.profileImage) return;
+
+    this.postService.uploadProfileImage(changes.profileImage)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (imageUrl) => {
+          const profileImageUrl = imageUrl.toString();
+          this.updateUserDetails({
+            profileImageUrl,
+            biography: changes.biography
+          });
+        },
+        error: (err) => {
+          this.handleError('Failed to upload image', err);
+        }
+      });
+  }
+
+  private updateProfileWithoutImage(changes: ProfileChanges): void {
+    if (!this.user) return;
+    
+    this.updateUserDetails({
+      biography: changes.biography
+    });
+  }
+
+  private updateUserDetails(details: UpdateUserDetailsRequest) {
+    if (!this.user) return;
+
+    this.userService.updateUser(this.user.id, details)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updatedUser) => {
+          this.user = updatedUser;
+          this.isEditMode = false;
+        },
+        error: (err) => {
+          this.handleError('Failed to update user', err);
+        }
+      });
+  }
+
+  private onLogout(): void {
+    this.authService.logout();
+    this.refreshPage();
+  }
+
+  private refreshPage(): void {
+    window.location.reload();
+  }
+
+  private handleError(message: string, error: any): void {
+    this.error = message;
+    this.loading = false;
+    console.error(`${message}:`, error);
   }
 }
