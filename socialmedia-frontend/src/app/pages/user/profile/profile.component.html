@@ -1,0 +1,84 @@
+<div [ngClass]="posts.length ? 'h-full' : 'h-screen'" class="card flex justify-center">
+  <div *ngIf="!isEditMode" class="w-full max-w-6xl">
+    <div class="flex items-center justify-center mb-8 pl-8">
+      
+      <div class="mr-32 flex-shrink-8">
+        <img 
+          [src]="user?.profileImageUrl || 'assets/avatar.png'" 
+          alt="Profile picture" 
+          class="w-[150px] h-[150px] rounded-full object-cover"
+        >
+      </div>
+
+      <div class="flex-1">
+        <div class="flex items-center mb-4">
+          <p class="text-[28px] font-normal mr-4 mb-0">{{ user?.userName || 'username' }}</p>
+          <div class="flex items-center gap-1">
+            <p-button styleClass="p-button-outlined" *ngIf="isOwnProfile" (click)="isEditMode = true">Edit Profile</p-button>
+            <p-button *ngIf="!isOwnProfile && !isFollowing" (click)="onFollow()">Follow</p-button>
+            <p-button *ngIf="!isOwnProfile && isFollowing" (click)="onUnfollow()">Unfollow</p-button>
+            <p-menu #menu [popup]="true" [model]="isOwnProfile ? menuItemsOwnProfile : menuItemsUser" />
+            <p-button icon="pi pi-ellipsis-v" styleClass="p-button-text p-button-rounded" (click)="menu.toggle($event)"/>
+          </div>
+        </div>
+
+        <div class="flex mb-6 gap-8 text-[16px]">
+          <span>
+            <strong class="font-semibold mr-1">{{ postCount || 0 }}</strong> posts
+          </span>
+          <span>
+            <strong class="font-semibold mr-1">{{ followerCount || 0 }}</strong> followers
+          </span>
+          <span>
+            <strong class="font-semibold mr-1">{{ followingCount || 0 }}</strong> following
+          </span>
+        </div>
+
+        <div class="text-[16px]">
+          <p class="font-bold mb-4">{{ user?.firstName }} {{ user?.lastName }}</p>
+          <p class="m-0 mb-1 text-base leading-6">{{ user?.biography || 'No biography provided' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-center border-t border-gray-200 mb-4"></div>
+
+    <div class="grid grid-cols-3 gap-1" *ngIf="posts?.length; else noPosts">
+      <div class="relative w-full pb-[100%] " *ngFor="let post of posts">
+        <img 
+          [src]="post.imageUrl" 
+          alt="Post"
+          class="absolute top-0 left-0 w-full h-full object-cover"  
+        >
+        <div class="absolute top-0 left-0 w-full h-full bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
+          <div class="flex text-white text-xl gap-2">
+            <span class="flex items-center justify-center mx-2 font-semibold">
+              <!-- TODO: post.likeCount -->
+              <i class="pi pi-heart mr-2"></i> {{ 0 }}
+            </span>
+            <span class="flex items-center justify-center mx-2 font-semibold">
+              <!-- TODO: post.commentCount -->
+              <i class="pi pi-comment mr-2"></i> {{ 0 }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noPosts>
+      <div *ngIf="isOwnProfile" class="flex items-center justify-center flex-col py-16 text-center">
+        <i class="pi pi-camera mb-4" style="font-size: 50px; color: var(--text-color-secondary);"></i>
+        <p class="text-3xl font-normal mb-2 text-[var(--text-color)]">No Posts Yet</p>
+        <p class="text-[var(--text-color-secondary)] mb-4">When you share photos, they will appear on your profile</p>
+        <p-button (click)="goToUploadPage()">Share your first photo</p-button>
+      </div>
+    </ng-template>
+  </div>
+
+  <app-profile-edit
+    *ngIf="isEditMode"
+    [user]="user"
+    (saveChanges)="onSaveChanges($event)"
+    (cancelEdit)="isEditMode = false"
+  ></app-profile-edit>
+</div>

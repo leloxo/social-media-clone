@@ -1,0 +1,147 @@
+<app-dark-mode-toggle></app-dark-mode-toggle>
+<div class="flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
+    <div class="flex flex-col items-center justify-center">
+        <div style="border-radius: 56px; padding: 0.3rem; background: var(--primary-contrast-color)">
+            <div class="w-full py-20 px-8 sm:px-20" style="border-radius: 53px">
+                <div class="text-center mb-8">
+                    <div class="text-3xl font-medium mb-4">Create a new account</div>
+                    <!-- <span class="text-muted-color font-medium">Sign in to continue</span> -->
+                </div>
+
+                <p-toast />
+                
+                <form [formGroup]="registrationForm">
+                    <div class="mb-3">
+                        <label for="firstName" class="block text-xl font-medium mb-2">First name</label>
+                        <input 
+                            pInputText 
+                            id="firstName" 
+                            type="firstName" 
+                            placeholder="Last name" 
+                            class="w-full md:w-[30rem] mb-3"
+                            formControlName="firstName"
+                            [ngClass]="{'ng-invalid ng-dirty': registrationForm.get('firstName')?.invalid && registrationForm.get('firstName')?.touched}" 
+                        />
+                        
+                        @if (registrationForm.get('firstName')?.hasError('required') && registrationForm.get('firstName')?.touched) {
+                            <p-message severity="error" variant="simple" size="small">First name is required</p-message>
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="lastName" class="block text-xl font-medium mb-2">Last name</label>
+                        <input 
+                            pInputText 
+                            id="lastName" 
+                            type="lastName" 
+                            placeholder="First name" 
+                            class="w-full md:w-[30rem] mb-3"
+                            formControlName="lastName"
+                            [ngClass]="{'ng-invalid ng-dirty': registrationForm.get('lastName')?.invalid && registrationForm.get('lastName')?.touched}" 
+                        />
+                        
+                        @if (registrationForm.get('lastName')?.hasError('required') && registrationForm.get('lastName')?.touched) {
+                            <p-message severity="error" variant="simple" size="small">Last name is required</p-message>
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="userName" class="block text-xl font-medium mb-2">User name</label>
+                        <input 
+                            pInputText 
+                            id="userName" 
+                            type="userName" 
+                            placeholder="User name" 
+                            class="w-full md:w-[30rem] mb-3"
+                            formControlName="userName"
+                            [ngClass]="{'ng-invalid ng-dirty': registrationForm.get('userName')?.invalid && registrationForm.get('userName')?.touched}" 
+                        />
+                        
+                        @if (registrationForm.get('userName')?.hasError('required') && registrationForm.get('userName')?.touched) {
+                            <p-message severity="error" variant="simple" size="small">User name is required</p-message>
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="block text-xl font-medium mb-2">Email</label>
+                        <input 
+                            pInputText 
+                            id="email" 
+                            type="email" 
+                            placeholder="Email address" 
+                            class="w-full md:w-[30rem] mb-3"
+                            formControlName="email"
+                            [ngClass]="{'ng-invalid ng-dirty': registrationForm.get('email')?.invalid && registrationForm.get('email')?.touched}" 
+                        />
+                        
+                        @if (registrationForm.get('email')?.hasError('required') && registrationForm.get('email')?.touched) {
+                            <p-message severity="error" variant="simple" size="small">Email is required</p-message>
+                        }
+                        @if (registrationForm.get('email')?.hasError('email') && registrationForm.get('email')?.touched) {
+                            <p-message severity="error" variant="simple" size="small">Invalid email format.</p-message>
+                        }
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="block font-medium text-xl mb-2">Password</label>
+                        <p-password 
+                            id="password"
+                            formControlName="password"
+                            placeholder="Password" 
+                            [toggleMask]="true"
+                            [ngClass]="{'ng-invalid ng-dirty': registrationForm.get('password')?.invalid && registrationForm.get('password')?.touched}" 
+                            styleClass="mb-3" 
+                            [fluid]="true" 
+                        >
+
+                            <ng-template #header>
+                                <div class="font-semibold text-xm mb-4">Pick a password</div>
+                            </ng-template>
+                            <ng-template #footer>
+                                <p-divider />
+                                <ul class="pl-2 ml-2 my-0 leading-normal">
+                                    <li>At least one lowercase</li>
+                                    <li>At least one uppercase</li>
+                                    <li>At least one numeric</li>
+                                    <li>Minimum 8 characters</li>
+                                </ul>
+                            </ng-template>
+
+                        </p-password>
+                        
+                        @if (registrationForm.get('password')?.hasError('required') && registrationForm.get('password')?.touched) {
+                            <p-message severity="error" variant="simple" size="small">Password is required.</p-message>
+                        }
+                    </div>
+
+                    <div class="mb-11">
+                        <label for="confirmPassword" class="block font-medium text-xl mb-2">Confirm password</label>
+                        <p-password 
+                            id="confirmPassword"
+                            formControlName="confirmPassword"
+                            placeholder="Password" 
+                            [toggleMask]="true"
+                            [ngClass]="{'ng-invalid ng-dirty': registrationForm.get('confirmPassword')?.invalid && registrationForm.get('confirmPassword')?.touched}" 
+                            styleClass="mb-4" 
+                            [fluid]="true"
+                            [feedback]="false" 
+                        >
+                        </p-password>
+                        
+                        @if (registrationForm.get('password')?.value != registrationForm.get('confirmPassword')?.value 
+                            && registrationForm.get('password')?.touched) {
+                            <p-message severity="error" variant="simple" size="small">Passwords don't match.</p-message>
+                        }
+                    </div>
+
+                    <p-button 
+                        label="Create account" 
+                        (onClick)="onRegister()"
+                        [disabled]="registrationForm.invalid"
+                        styleClass="w-full">
+                    </p-button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,35 @@
+<div class="card min-h-screen overflow-hidden">
+    <div class="max-w-6xl mx-auto">
+        <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input 
+                type="text" 
+                pInputText 
+                placeholder="Type to search users..." 
+                [(ngModel)]="searchTerm" 
+                (input)="onSearch()"
+                class="w-full h-13"
+            />
+        </p-iconfield>
+        
+        <div *ngIf="users && users.length > 0" 
+            class="mt-4 bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-[var(--content-border-radius)] p-2">
+            <ul>
+                <li 
+                    *ngFor="let user of users" 
+                    (click)="viewUserProfile(user.userName)"
+                    class="flex items-center gap-3 p-2 rounded-[var(--content-border-radius)] cursor-pointer 
+                        bg-[var(--surface-card)] text-[var(--text-color)] 
+                        hover:bg-[var(--surface-hover)] transition-[var(--element-transition-duration)]"
+                >
+                    <img 
+                        [src]="user?.profileImageUrl || 'assets/avatar.png'" 
+                        alt="Profile picture" 
+                        class="w-10 h-10 rounded-full border border-[var(--surface-border)]"
+                    />
+                    <span class="font-medium">{{ user.userName }}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
