@@ -1,7 +1,0 @@
-@use 'variables' as vars;
-
-.container {
-    max-width: vars.$container-max-width;
-    margin: 0 auto;
-    padding: vars.$spacing-lg;
-}
