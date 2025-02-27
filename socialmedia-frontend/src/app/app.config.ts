@@ -1,11 +1,11 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
-import { jwtInterceptor } from './auth/jwt.interceptor';
+import { jwtInterceptor } from './core/interceptors/jwt.interceptor';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import { routes } from './app.routes';
-import { Noir } from '../assets/layout/noir-preset';
+import { Noir } from '../assets/layout/preset/noir-preset';
 
 export const appConfig: ApplicationConfig = {
   providers: [

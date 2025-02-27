@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './auth/login/login.component';
-import { RegisterComponent } from './auth/register/register.component';
-import { ProfileComponent } from './user/profile/profile.component';
-import { SearchComponent } from './user/search/search.component';
-import { HomeComponent } from './home/home.component';
-import { PostComponent } from './post/post.component';
+import { LoginComponent } from './pages/auth/login/login.component';
+import { RegisterComponent } from './pages/auth/register/register.component';
+import { ProfileComponent } from './pages/user/profile/profile.component';
+import { SearchComponent } from './pages/user/search/search.component';
+import { HomeComponent } from './pages/home/home.component';
+import { UploadComponent } from './pages/upload/upload.component';
 import { AppLayout } from './layout/component/app.layout';
 
 export const routes: Routes = [
@@ -20,7 +20,7 @@ export const routes: Routes = [
             { path: 'profile', redirectTo: 'profile/me', pathMatch: 'full' },
             { path: 'profile/:username', component: ProfileComponent },
             { path: 'search', component: SearchComponent },
-            { path: 'upload', component: PostComponent },
+            { path: 'upload', component: UploadComponent },
         ]
     },
 
