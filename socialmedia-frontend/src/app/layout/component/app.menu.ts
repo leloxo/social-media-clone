@@ -25,7 +25,7 @@ export class AppMenu {
                     { label: 'Home', icon: 'pi pi-fw pi-home', routerLink: ['/home'] },
                     { label: 'Search', icon: 'pi pi-fw pi-search', routerLink: ['/search'] },
                     { label: 'Create', icon: 'pi pi-fw pi-plus', routerLink: ['/upload'] },
-                    { label: 'Profile', icon: 'pi pi-fw pi-user', routerLink: ['/profile'] }
+                    { label: 'Profile', icon: 'pi pi-fw pi-user', routerLink: ['/profile/me'] }
                 ]
             }
         ];
