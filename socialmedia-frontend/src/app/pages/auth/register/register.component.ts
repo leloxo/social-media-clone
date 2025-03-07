@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DividerModule } from 'primeng/divider';
@@ -11,6 +11,8 @@ import { PasswordModule } from 'primeng/password';
 import { ToastModule } from 'primeng/toast';
 import { AppDarkModeToggle } from "../../../layout/component/app.dark-mode-toggle";
 import { AuthService } from '../../../services/auth.service';
+import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
+import { RegistrationUserData } from '../../../models/auth/registration-credentials.model';
 
 @Component({
   selector: 'app-register',
@@ -23,44 +25,73 @@ import { AuthService } from '../../../services/auth.service';
       ToastModule,
       MessageModule,
       PasswordModule,
+      RouterModule,
       AppDarkModeToggle
     ],
   templateUrl: './register.component.html',
   providers: [MessageService]
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnDestroy {
+  private readonly authService = inject(AuthService);
+  private readonly messageService = inject(MessageService);
+  private readonly router = inject(Router);
+  private readonly destroy$ = new Subject<void>();
+  private readonly loadingSubject = new BehaviorSubject<boolean>(false);
+    
+  readonly isLoading$ = this.loadingSubject.asObservable();
 
-  registrationForm = new FormGroup({
-    firstName: new FormControl('', [Validators.required]),
-    lastName: new FormControl('', [Validators.required]),
-    userName: new FormControl('', [Validators.required]),
-    email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required]),
-    confirmPassword: new FormControl('', [Validators.required]),
+  readonly registrationForm = new FormGroup({
+    firstName: new FormControl<string>('', {
+      nonNullable: true,
+      validators: [Validators.required]
+    }),
+    lastName: new FormControl<string>('', {
+      nonNullable: true,
+      validators: [Validators.required]
+    }),
+    userName: new FormControl<string>('', {
+      nonNullable: true,
+      validators: [Validators.required]
+    }),
+    email: new FormControl<string>('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$")]
+    }),
+    password: new FormControl<string>('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.pattern("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$")]
+    }),
+    confirmPassword: new FormControl<string>('', {
+      nonNullable: true,
+      validators: [Validators.required]
+    })
   });
 
-  constructor(private authService: AuthService, private messageService: MessageService, private router: Router) {}
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   onRegister(): void {
     if (this.registrationForm.invalid) {
       return;
     }
 
-    const firstName = this.registrationForm.get('firstName')?.value;
-    const lastName = this.registrationForm.get('lastName')?.value;
-    const userName = this.registrationForm.get('userName')?.value;
-    const email = this.registrationForm.get('email')?.value;
-    const password = this.registrationForm.get('password')?.value;
+    const userData: RegistrationUserData = this.registrationForm.getRawValue();
+    this.loadingSubject.next(true);
 
-    this.authService.register({ firstName: firstName, lastName: lastName, userName: userName, email: email, password: password }).subscribe({
-      next: (response: any) => {
-        console.log(response.personData)
-        this.router.navigate([`/login`]);
-      },
-      error: (err: any) => {
-        this.showErrorViaToast();
-      }
-    });
+    this.authService.register(userData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.loadingSubject.next(true);
+          this.router.navigate([`/login`]);
+        },
+        error: () => {
+          this.loadingSubject.next(false);
+          this.showErrorViaToast();
+        }
+      });
   }
 
   showErrorViaToast() {

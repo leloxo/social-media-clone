@@ -3,7 +3,7 @@
     <div class="flex flex-col items-center justify-center">
         <div class="shadow-md" style="border-radius: 56px; padding: 0.3rem; background: var(--primary-contrast-color)">
             <div class="w-full py-20 px-8 sm:px-20" style="border-radius: 53px">
-                <div class="text-center mb-8">
+                <div class="text-center mb-12">
                     <div class="text-3xl font-medium mb-4">Welcome to SMC!</div>
                     <span class="font-medium">Sign in to continue</span>
                 </div>
@@ -11,27 +11,29 @@
                 <p-toast />
                 
                 <form [formGroup]="loginForm">
-                    <div class="mb-8">
+                    <div class="mb-4">
                         <label for="email" class="block text-xl font-medium mb-2">Email</label>
                         <input 
                             pInputText 
                             id="email" 
                             type="email" 
                             placeholder="Email address" 
-                            class="w-full md:w-[30rem] mb-3"
+                            class="w-full md:w-[30rem] mb-1"
                             formControlName="email"
                             [ngClass]="{'ng-invalid ng-dirty': loginForm.get('email')?.invalid && loginForm.get('email')?.touched}" 
                         />
                         
-                        @if (loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched) {
-                            <p-message severity="error" variant="simple" size="small">Email is required</p-message>
-                        }
-                        @if (loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched) {
-                            <p-message severity="error" variant="simple" size="small">Invalid email format.</p-message>
-                        }
+                        <div class="min-h-6">
+                            @if (loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched) {
+                                <p-message severity="error" variant="simple" size="small">Email is required</p-message>
+                            }
+                            @if (loginForm.get('email')?.hasError('pattern') && loginForm.get('email')?.touched) {
+                                <p-message severity="error" variant="simple" size="small">Invalid email format.</p-message>
+                            }
+                        </div>
                     </div>
                     
-                    <div class="mb-11">
+                    <div class="mb-8">
                         <label for="password" class="block font-medium text-xl mb-2">Password</label>
                         <p-password 
                             id="password"
@@ -39,24 +41,27 @@
                             placeholder="Password" 
                             [toggleMask]="true"
                             [ngClass]="{'ng-invalid ng-dirty': loginForm.get('password')?.invalid && loginForm.get('password')?.touched}" 
-                            styleClass="mb-4" 
+                            styleClass="mb-1" 
                             [fluid]="true" 
                             [feedback]="false">
                         </p-password>
                         
-                        @if (loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched) {
-                            <p-message severity="error" variant="simple" size="small">Password is required.</p-message>
-                        }
+                        <div class="min-h-6">
+                            @if (loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched) {
+                                <p-message severity="error" variant="simple" size="small">Password is required.</p-message>
+                            }
+                        </div>
                     </div>
 
                     <p-button 
                         label="Sign In" 
                         (onClick)="onLogin()"
                         [disabled]="loginForm.invalid"
+                        [loading]="isLoading$ | async"
                         styleClass="w-full">
                     </p-button>
 
-                    <div class="flex items-center justify-between mt-2 mb-8 gap-8">
+                    <div class="flex items-center justify-center mt-2 gap-8">
                         <span class="font-medium no-underline text-right text-primary">
                             Don't have an account? <b class="cursor-pointer" [routerLink]="['/register']">Sign Up</b>
                         </span>

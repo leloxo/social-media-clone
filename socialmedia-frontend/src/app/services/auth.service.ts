@@ -1,23 +1,28 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { LoginCredentials } from '../models/auth/login-credentials.model';
+import { LoginResponse } from '../models/auth/login-response.model';
+import { RegistrationUserData } from '../models/auth/registration-credentials.model';
+import { User } from '../models/user/user.model';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AuthService {
-    private baseUrl = 'http://localhost:8005/auth';
+    private readonly http = inject(HttpClient);
+    private readonly baseUrl = 'http://localhost:8005/auth';
 
-    constructor(private http: HttpClient) {}
-
-    // TODO use DTO classes and make user class
-    
-    register(personData: any): Observable<any> {
-        return this.http.post(`${this.baseUrl}/signup`, personData);
+    register(userData: RegistrationUserData): Observable<User> {
+        return this.http.post<User>(`${this.baseUrl}/signup`, userData);
     }
 
-    login(credentials: any): Observable<any> {
-        return this.http.post(`${this.baseUrl}/login`, credentials);
+    login(credentials: LoginCredentials): Observable<LoginResponse> {
+        return this.http.post<LoginResponse>(`${this.baseUrl}/login`, credentials);
+    }
+
+    isLoggedIn(): Observable<boolean> {
+        return this.http.get<boolean>(`${this.baseUrl}/status`);
     }
 
     saveToken(token: string): void {
