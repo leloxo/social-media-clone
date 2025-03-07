@@ -1,18 +1,18 @@
-import { Component, Renderer2, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, Renderer2, ViewChild } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
-import { AppTopbar } from './app.topbar';
-import { AppSidebar } from './app.sidebar';
-import { AppFooter } from './app.footer';
 import { LayoutService } from '../service/layout.service';
-import { AppDarkModeToggle } from "./app.dark-mode-toggle";
+import { AppFooter } from './app.footer';
+import { AppSidebar } from './app.sidebar';
+import { AppTopbar } from './app.topbar';
 
 @Component({
     selector: 'app-layout',
     standalone: true,
-    imports: [CommonModule, AppSidebar, RouterModule, AppFooter, AppDarkModeToggle],
+    imports: [CommonModule, AppSidebar, RouterModule, AppFooter, AppTopbar],
     template: `<div class="layout-wrapper" [ngClass]="containerClass">
+        <app-topbar></app-topbar>
         <app-sidebar></app-sidebar>
         <div class="layout-main-container">
             <div class="layout-main">
@@ -20,7 +20,6 @@ import { AppDarkModeToggle } from "./app.dark-mode-toggle";
             </div>
             <app-footer></app-footer>
         </div>
-        <app-dark-mode-toggle></app-dark-mode-toggle>
         <div class="layout-mask animate-fadein"></div>
     </div> `
 })
