@@ -1,4 +1,4 @@
-import { HttpErrorResponse, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
+import { HttpErrorResponse, HttpHandlerFn, HttpInterceptorFn, HttpRequest, HttpStatusCode } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { catchError, throwError } from 'rxjs';
@@ -17,7 +17,7 @@ export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, nex
   
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 || error.status === 403) {
+      if (error.status === HttpStatusCode.Forbidden) {
         authService.logout();
         router.navigate(['/login']);
       }
