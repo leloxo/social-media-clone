@@ -62,7 +62,7 @@ public class PostService {
 
     public Post getPostById(Long postId) throws ResourceNotFoundException {
         return postRepository.findByIdWithDetails(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post with id " + postId + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Post with id '" + postId + "' not found"));
     }
 
     public Page<Post> getAllPosts(Pageable pageable) {
