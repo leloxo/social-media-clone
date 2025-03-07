@@ -27,12 +27,12 @@ public class UserService {
 
     public User findUserByUserName(String username) throws ResourceNotFoundException {
         return userRepository.findByUserName(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User with username " + username + " not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("User with username '" + username + "' not found."));
     }
 
     public User updateUser(Long userId, UpdateUserDetailsRequest details) throws ResourceNotFoundException {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id " + userId + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User with id '" + userId + "' not found"));
 
         if (details.getBiography() != null) {
             user.setBiography(details.getBiography());
