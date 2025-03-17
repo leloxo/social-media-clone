@@ -32,11 +32,9 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDetailsResponse> authenticatedUser(@AuthenticationPrincipal User currentUser) {
-        // Manual Approach (Delete later)
-        // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        // User currentUser = (User) authentication.getPrincipal();
-
+    public ResponseEntity<UserDetailsResponse> authenticatedUser(
+            @AuthenticationPrincipal User currentUser
+    ) {
         return ResponseEntity.ok(dataConvertor.toUserDto(currentUser));
     }
 
@@ -66,8 +64,6 @@ public class UserController {
         if (!currentUser.getId().equals(userId)) {
             throw new UnauthorizedException("You can only update your own profile");
         }
-
-        System.out.println(updatedUserDetails);
 
         User updatedUser = userService.updateUser(userId, updatedUserDetails);
         return ResponseEntity.ok(dataConvertor.toUserDto(updatedUser));

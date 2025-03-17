@@ -9,10 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
-@Transactional
 public class UserFollowService {
     private final UserRepository userRepository;
     private final UserFollowRepository userFollowRepository;
@@ -22,73 +20,104 @@ public class UserFollowService {
         this.userFollowRepository = userFollowRepository;
     }
 
+    @Transactional
     public void followUser(Long followerId, Long followingId) throws ResourceNotFoundException {
         if (followerId.equals(followingId)) {
             throw new IllegalArgumentException("Users cannot follow themselves");
         }
 
-        // Verify both users exist
-        userRepository.findById(followerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Follower user not found"));
-        userRepository.findById(followingId)
-                .orElseThrow(() -> new ResourceNotFoundException("Target user not found"));
-
-        // Check if already following
         if (userFollowRepository.existsByFollowerIdAndFollowingId(followerId, followingId)) {
             return;
         }
 
+        User follower = userRepository.findById(followerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Follower user not found"));
+        User following = userRepository.findById(followingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Target user not found"));
+
         UserFollow userFollow = new UserFollow();
-        userFollow.setFollowerId(followerId);
-        userFollow.setFollowingId(followingId);
+        userFollow.setFollower(follower);
+        userFollow.setFollowing(following);
         userFollowRepository.save(userFollow);
     }
 
-    public void unfollowUser(Long followerId, Long followingId) {
+    @Transactional
+    public void unfollowUser(Long followerId, Long followingId) throws ResourceNotFoundException {
+        if (!userRepository.existsById(followerId)) {
+            throw new ResourceNotFoundException("Follower user not found");
+        }
+        if (!userRepository.existsById(followingId)) {
+            throw new ResourceNotFoundException("Target user not found");
+        }
+
         userFollowRepository.deleteByFollowerIdAndFollowingId(followerId, followingId);
     }
 
-    public boolean isFollowing(Long followerId, Long followingId) {
+    @Transactional(readOnly = true)
+    public boolean isFollowing(Long followerId, Long followingId) throws ResourceNotFoundException {
+        if (!userRepository.existsById(followerId)) {
+            throw new ResourceNotFoundException("Follower user not found");
+        }
+        if (!userRepository.existsById(followingId)) {
+            throw new ResourceNotFoundException("Target user not found");
+        }
+
         return userFollowRepository.existsByFollowerIdAndFollowingId(followerId, followingId);
     }
 
-    public List<User> getFollowers(Long userId) {
-        List<Long> followerIds = userFollowRepository.findByFollowingId(userId)
-                .stream()
-                .map(UserFollow::getFollowerId)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public List<User> getFollowers(Long userId) throws ResourceNotFoundException {
+        if (!userRepository.existsById(userId)) {
+            throw new ResourceNotFoundException("User not found");
+        }
 
-        return userRepository.findAllById(followerIds);
+        return userFollowRepository.findFollowersByFollowingId(userId);
     }
 
-    public List<Long> getFollowerIds(Long userId) {
-        return userFollowRepository.findByFollowingId(userId)
-                .stream()
-                .map(UserFollow::getFollowerId)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public List<Long> getFollowerIds(Long userId) throws ResourceNotFoundException {
+        if (!userRepository.existsById(userId)) {
+            throw new ResourceNotFoundException("User not found");
+        }
+
+        return userFollowRepository.findFollowerIdsByFollowingId(userId);
     }
 
-    public List<User> getFollowing(Long userId) {
-        List<Long> followingIds = userFollowRepository.findByFollowerId(userId)
-                .stream()
-                .map(UserFollow::getFollowingId)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public List<User> getFollowing(Long userId) throws ResourceNotFoundException {
+        if (!userRepository.existsById(userId)) {
+            throw new ResourceNotFoundException("User not found");
+        }
 
-        return userRepository.findAllById(followingIds);
+        return userFollowRepository.findFollowingByFollowerId(userId);
     }
 
-    public List<Long> getFollowingIds(Long userId) {
-        return userFollowRepository.findByFollowerId(userId)
-                .stream()
-                .map(UserFollow::getFollowingId)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public List<Long> getFollowingIds(Long userId) throws ResourceNotFoundException {
+        if (!userRepository.existsById(userId)) {
+            throw new ResourceNotFoundException("User not found");
+        }
+
+        List<Long> followingIds = userFollowRepository.findFollowingIdsByFollowerId(userId);
+        followingIds.add(userId); // Include the current user's posts
+        return followingIds;
     }
 
-    public long getFollowersCount(Long userId) {
+    @Transactional(readOnly = true)
+    public long getFollowersCount(Long userId) throws ResourceNotFoundException {
+        if (!userRepository.existsById(userId)) {
+            throw new ResourceNotFoundException("User not found");
+        }
+
         return userFollowRepository.countByFollowingId(userId);
     }
 
-    public long getFollowingCount(Long userId) {
+    @Transactional(readOnly = true)
+    public long getFollowingCount(Long userId) throws ResourceNotFoundException {
+        if (!userRepository.existsById(userId)) {
+            throw new ResourceNotFoundException("User not found");
+        }
+
         return userFollowRepository.countByFollowerId(userId);
     }
 }

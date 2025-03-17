@@ -8,39 +8,22 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-
-    @Query("""
-        SELECT p FROM Post p
-        LEFT JOIN FETCH p.author
-        LEFT JOIN FETCH p.comments c
-        LEFT JOIN FETCH c.author
-        WHERE p.author.id = :authorId
-        """)
-    Page<Post> findByAuthorId(Long authorId, Pageable pageable);
-
-    @Query("""
+    @Query(value = """
         SELECT p FROM Post p
         LEFT JOIN FETCH p.author
         LEFT JOIN FETCH p.comments c
         LEFT JOIN FETCH c.author
         WHERE p.author.userName = :username
+        """, countQuery = """
+        SELECT COUNT(DISTINCT p) FROM Post p
+        WHERE p.author.userName = :username
         """)
-    Page<Post> findByAuthorUserName(String username, Pageable pageable);
-
-    @Query("""
-        SELECT p FROM Post p
-        LEFT JOIN FETCH p.author
-        LEFT JOIN FETCH p.comments c
-        LEFT JOIN FETCH c.author
-        WHERE p.author.id IN :authorIds
-        """)
-    Page<Post> findByAuthorIdIn(Collection<Long> authorIds, Pageable pageable);
+    Page<Post> findByAuthorUserNameWithDetails(String username, Pageable pageable);
 
     @Query("""
         SELECT p FROM Post p
@@ -51,20 +34,21 @@ public interface PostRepository extends JpaRepository<Post, Long> {
         """)
     Optional<Post> findByIdWithDetails(Long postId);
 
-    @Query("""
-        SELECT p FROM Post p
-        LEFT JOIN FETCH p.author
-        LEFT JOIN FETCH p.comments c
-        LEFT JOIN FETCH c.author
-        ORDER BY p.createdAt DESC
-        """)
-    Page<Post> findAllWithDetails(Pageable pageable);
+    @Query(" SELECT p.likeCount FROM Post p WHERE p.id = :postId")
+    int findLikeCountById(@Param("postId") Long postId);
 
-    @Query("""
-        SELECT COUNT(c)
+    @Query("SELECT p.commentCount FROM Post p WHERE p.id = :postId")
+    int findCommentCountById(@Param("postId") Long postId);
+
+    @Query(value = """
+        SELECT DISTINCT p
         FROM Post p
-        LEFT JOIN p.comments c
-        WHERE p.id = :postId
+        LEFT JOIN FETCH p.author
+        WHERE p.author.id IN :authorIds
+        ORDER BY p.createdAt DESC
+        """, countQuery = """
+        SELECT COUNT(DISTINCT p) FROM Post p
+        WHERE p.author.id IN :authorIds
         """)
-    int countCommentsById(Long postId);
+    Page<Post> findByAuthorIdsIn(@Param("authorIds") List<Long> authorIds, Pageable pageable);
 }

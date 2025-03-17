@@ -5,6 +5,7 @@ import io.jsonwebtoken.security.SignatureException;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
@@ -69,6 +70,18 @@ public class GlobalExceptionHandler {
 
         ProblemDetail errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         errorDetail.setTitle("Resource Not Found");
+        errorDetail.setProperty("timestamp", Instant.now());
+
+        return errorDetail;
+    }
+
+    // TODO: User creation exception handlers
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail dataIntegrityViolationException(DataIntegrityViolationException ex) {
+        logger.warn("SQL Error: {}", ex.getMessage());
+
+        ProblemDetail errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Duplicate entry");
+        errorDetail.setTitle("Data Integrity Violation");
         errorDetail.setProperty("timestamp", Instant.now());
 
         return errorDetail;

@@ -11,23 +11,27 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@Table(name = "user_follows",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"follower_id", "following_id"})
+@Table(name = "post_likes",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"post_id", "user_id"}),
+        indexes = {
+                @Index(name = "idx_post_like_post_id", columnList = "post_id"),
+                @Index(name = "idx_post_like_user_id", columnList = "user_id")
+        }
 )
-public class UserFollow {
+public class PostLike {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "follower_id", nullable = false)
+    @JoinColumn(name = "post_id", nullable = false)
     @ToString.Exclude
-    private User follower;
+    private Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "following_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     @ToString.Exclude
-    private User following;
+    private User user;
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
@@ -36,9 +40,9 @@ public class UserFollow {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof UserFollow)) return false;
-        UserFollow follow = (UserFollow) o;
-        return id != null && id.equals(follow.getId());
+        if (!(o instanceof PostLike)) return false;
+        PostLike postLike = (PostLike) o;
+        return id != null && id.equals(postLike.getId());
     }
 
     @Override

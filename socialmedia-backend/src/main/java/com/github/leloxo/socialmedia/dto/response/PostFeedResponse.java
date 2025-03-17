@@ -16,4 +16,5 @@ public class PostFeedResponse {
     private LocalDateTime createdAt;
     private UserSummaryResponse authorSummary;
     private int commentCount;
+    private int likeCount;
 }

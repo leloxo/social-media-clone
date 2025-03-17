@@ -1,8 +1,9 @@
 package com.github.leloxo.socialmedia.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,7 +16,12 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Data
+@Getter
+@Setter
+@Table(name = "user", indexes = {
+        @Index(name = "idx_user_name", columnList = "user_name"),
+        @Index(name = "idx_user_email", columnList = "email")
+})
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,13 +33,14 @@ public class User implements UserDetails {
     @Column(nullable = false, length = 50)
     private String lastName;
 
-    @Column(unique = true, length = 20, nullable = false)
+    @Column(name = "user_name", unique = true, length = 20, nullable = false)
     private String userName;
 
     @Column(unique = true, length = 100, nullable = false)
     private String email;
 
     @Column(nullable = false)
+    @ToString.Exclude
     private String password;
 
     private String profileImageUrl;
@@ -41,14 +48,25 @@ public class User implements UserDetails {
     @Column(length = 200)
     private String biography;
 
-    // TODO: check if circular dependency is a issue
-    @OneToMany(mappedBy = "author")
-    @JsonIgnore
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private Set<Post> posts = new HashSet<>();
-    // TODO: check if circular dependency is a issue
-    @OneToMany(mappedBy = "author")
-    @JsonIgnore
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private Set<Comment> comments = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private Set<PostLike> likes = new HashSet<>();
+
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private Set<UserFollow> following = new HashSet<>();
+
+    @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private Set<UserFollow> followers = new HashSet<>();
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
@@ -58,6 +76,10 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "is_active", nullable = false)
+    private Boolean active = true;
+
+    // Spring Security
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
@@ -70,30 +92,44 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email; // TODO
+        // Using email as the username for Spring Security
+        return email;
     }
 
-    public String getUserName() {
+    public String getDisplayUsername() {
         return userName;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return active;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return active;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return active;
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return active;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+        User user = (User) o;
+        return id != null && id.equals(user.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

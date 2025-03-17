@@ -1,7 +1,7 @@
 package com.github.leloxo.socialmedia.controller;
 
 import com.github.leloxo.socialmedia.dto.DataConvertor;
-import com.github.leloxo.socialmedia.dto.response.UserSummaryResponse;
+import com.github.leloxo.socialmedia.dto.response.*;
 import com.github.leloxo.socialmedia.exception.ResourceNotFoundException;
 import com.github.leloxo.socialmedia.model.User;
 import com.github.leloxo.socialmedia.service.UserFollowService;
@@ -9,13 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/follows")
 public class UserFollowController {
+    // TODO: Add pagination to get follower/following
+
     private final UserFollowService userFollowService;
     private final DataConvertor dataConvertor;
 
@@ -25,76 +25,88 @@ public class UserFollowController {
     }
 
     @PostMapping("/{targetUserId}")
-    public ResponseEntity<Void> followUser(
+    public ResponseEntity<ApiResponse> followUser(
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long targetUserId
     ) throws ResourceNotFoundException {
         userFollowService.followUser(currentUser.getId(), targetUserId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new ApiResponse(true, "Successfully followed user"));
     }
 
     @DeleteMapping("/{targetUserId}")
-    public ResponseEntity<Void> unfollowUser(
+    public ResponseEntity<ApiResponse> unfollowUser(
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long targetUserId
-    ) {
+    ) throws ResourceNotFoundException {
         userFollowService.unfollowUser(currentUser.getId(), targetUserId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new ApiResponse(true, "Successfully unfollowed user"));
     }
 
     @GetMapping("/followers")
-    public ResponseEntity<List<UserSummaryResponse>> getFollowers(@AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<FollowersResponse> getFollowers(
+            @AuthenticationPrincipal User currentUser
+    ) throws ResourceNotFoundException {
         List<User> followers = userFollowService.getFollowers(currentUser.getId());
-        return ResponseEntity.ok(dataConvertor.toUserSummaryDtoList(followers));
+        List<UserSummaryResponse> followerDtos = dataConvertor.toUserSummaryDtoList(followers);
+
+        return ResponseEntity.ok(new FollowersResponse(followerDtos, followerDtos.size()));
     }
 
     @GetMapping("/following")
-    public ResponseEntity<List<UserSummaryResponse>> getFollowing(@AuthenticationPrincipal User currentUser) {
-        List<User> followers = userFollowService.getFollowing(currentUser.getId());
-        return ResponseEntity.ok(dataConvertor.toUserSummaryDtoList(followers));
+    public ResponseEntity<FollowingResponse> getFollowing(
+            @AuthenticationPrincipal User currentUser
+    ) throws ResourceNotFoundException {
+        List<User> following = userFollowService.getFollowing(currentUser.getId());
+        List<UserSummaryResponse> followingDtos = dataConvertor.toUserSummaryDtoList(following);
+
+        return ResponseEntity.ok(new FollowingResponse(followingDtos, followingDtos.size()));
     }
-
-    @GetMapping("/followers/count/{userId}")
-    public ResponseEntity<Long> getFollowersCount(@PathVariable Long userId) {
-        return ResponseEntity.ok(userFollowService.getFollowersCount(userId));
-    }
-
-    @GetMapping("/following/count/{userId}")
-    public ResponseEntity<Long> getFollowingCount(@PathVariable Long userId) {
-        return ResponseEntity.ok(userFollowService.getFollowingCount(userId));
-    }
-
-//    @GetMapping("/status/{targetUserId}")
-//    public ResponseEntity<Map<String, Boolean>> getFollowStatus(
-//            @AuthenticationPrincipal User currentUser,
-//            @PathVariable Long targetUserId
-//    ) {
-//        boolean isFollowing = userFollowService.isFollowing(currentUser.getId(), targetUserId);
-//        Map<String, Boolean> response = new HashMap<>();
-//        response.put("following", isFollowing);
-//        return ResponseEntity.ok(response);
-//    }
-
-    @GetMapping("/status/{targetUserId}")
-    public ResponseEntity<Boolean> getFollowStatus(
-            @AuthenticationPrincipal User currentUser,
-            @PathVariable Long targetUserId
-    ) {
-        boolean isFollowing = userFollowService.isFollowing(currentUser.getId(), targetUserId);
-        return ResponseEntity.ok(isFollowing);
-    }
-
-    // TODO: leave in or remove?
 
     @GetMapping("/user/{userId}/following")
-    public ResponseEntity<List<UserSummaryResponse>> getUserFollowing(@PathVariable Long userId) {
+    public ResponseEntity<UserFollowingResponse> getUserFollowing(
+            @PathVariable Long userId
+    ) throws ResourceNotFoundException {
         List<User> following = userFollowService.getFollowing(userId);
-        return ResponseEntity.ok(dataConvertor.toUserSummaryDtoList(following));
+        List<UserSummaryResponse> followingDtos = dataConvertor.toUserSummaryDtoList(following);
+
+        return ResponseEntity.ok(new UserFollowingResponse(userId, followingDtos, followingDtos.size()));
     }
 
     @GetMapping("/user/{userId}/followers")
-    public ResponseEntity<List<UserSummaryResponse>> getUserFollowers(@PathVariable Long userId) {
+    public ResponseEntity<UserFollowersResponse> getUserFollowers(
+            @PathVariable Long userId
+    ) throws ResourceNotFoundException {
         List<User> followers = userFollowService.getFollowers(userId);
-        return ResponseEntity.ok(dataConvertor.toUserSummaryDtoList(followers));
+        List<UserSummaryResponse> followerDtos = dataConvertor.toUserSummaryDtoList(followers);
+
+        return ResponseEntity.ok(new UserFollowersResponse(userId, followerDtos, followerDtos.size()));
+    }
+
+    @GetMapping("/followers/count/{userId}")
+    public ResponseEntity<FollowerCountResponse> getFollowersCount(
+            @PathVariable Long userId
+    ) throws ResourceNotFoundException {
+        long count = userFollowService.getFollowersCount(userId);
+
+        return ResponseEntity.ok(new FollowerCountResponse(userId, count));
+    }
+
+    @GetMapping("/following/count/{userId}")
+    public ResponseEntity<FollowingCountResponse> getFollowingCount(
+            @PathVariable Long userId
+    ) throws ResourceNotFoundException {
+        long count = userFollowService.getFollowingCount(userId);
+
+        return ResponseEntity.ok(new FollowingCountResponse(userId, count));
+    }
+
+    @GetMapping("/status/{targetUserId}")
+    public ResponseEntity<FollowStatusResponse> getFollowStatus(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable Long targetUserId
+    ) throws ResourceNotFoundException {
+        boolean isFollowing = userFollowService.isFollowing(currentUser.getId(), targetUserId);
+
+        return ResponseEntity.ok(new FollowStatusResponse(isFollowing, currentUser.getId(), targetUserId));
     }
 }

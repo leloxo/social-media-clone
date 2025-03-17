@@ -18,7 +18,7 @@ public class DataConvertor {
                 user.getId(),
                 user.getFirstName(),
                 user.getLastName(),
-                user.getUserName(),
+                user.getDisplayUsername(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
                 user.getProfileImageUrl(),
@@ -32,7 +32,7 @@ public class DataConvertor {
                         user.getId(),
                         user.getFirstName(),
                         user.getLastName(),
-                        user.getUserName(),
+                        user.getDisplayUsername(),
                         user.getCreatedAt(),
                         user.getUpdatedAt(),
                         user.getProfileImageUrl(),
@@ -44,7 +44,7 @@ public class DataConvertor {
     public UserSummaryResponse toUserSummaryDto(User user) {
         return new UserSummaryResponse(
                 user.getId(),
-                user.getUserName(),
+                user.getDisplayUsername(),
                 user.getProfileImageUrl()
         );
     }
@@ -53,7 +53,7 @@ public class DataConvertor {
         return users.stream()
                 .map(user -> new UserSummaryResponse(
                         user.getId(),
-                        user.getUserName(),
+                        user.getDisplayUsername(),
                         user.getProfileImageUrl()
                 ))
                 .collect(Collectors.toList());
@@ -66,7 +66,9 @@ public class DataConvertor {
                 post.getCaption(),
                 post.getCreatedAt(),
                 toUserSummaryDto(post.getAuthor()),
-                toCommentDtoList(post.getComments())
+                toCommentDtoList(post.getComments()),
+                post.getLikeCount(),
+                post.getCommentCount()
         );
     }
 
@@ -81,14 +83,15 @@ public class DataConvertor {
                 .collect(Collectors.toList());
     }
 
-    public PostFeedResponse toFeedDto(Post post, int commentCount) {
+    public PostFeedResponse toFeedDto(Post post) {
         return new PostFeedResponse(
                 post.getId(),
                 post.getImageUrl(),
                 post.getCaption(),
                 post.getCreatedAt(),
                 toUserSummaryDto(post.getAuthor()),
-                commentCount
+                post.getCommentCount(),
+                post.getLikeCount()
         );
     }
 }

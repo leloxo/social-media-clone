@@ -14,17 +14,20 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     public AuthenticationService(
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
-            PasswordEncoder passwordEncoder
-    ) {
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
+    // TODO: fix problem with service being called two times (frontend)
     public User signup(RegisterUserRequest input) {
         User user = new User();
         user.setFirstName(input.getFirstName());
@@ -43,5 +46,11 @@ public class AuthenticationService {
                 )
         );
         return userRepository.findByEmail(input.getEmail()).orElseThrow();
+    }
+
+    // TODO:
+    public void logout(String token) {
+//        SecurityContextHolder.clearContext();
+        jwtService.invalidateToken(token);
     }
 }

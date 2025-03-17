@@ -17,4 +17,6 @@ public class PostDetailsResponse {
     private LocalDateTime createdAt;
     private UserSummaryResponse authorSummary;
     private List<CommentDetailsResponse> comments;
+    private int likeCount;
+    private int commentCount;
 }
